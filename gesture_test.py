@@ -140,7 +140,7 @@ while cap.isOpened():
                             grab_angle = (math.degrees(math.atan2(joint[17][1] - joint[3][1],
                                                               joint[17][0] - joint[3][0])))
 
-                        utils.draw_timeline(image, angle, abs_joint)
+                        utils.draw_timeline(image, grab_angle, abs_joint)
 
                     cv2.putText(image, f'{action.upper()}',
                                 org=(int(abs_joint[0][0]), int(abs_joint[0][1] + 20)),
