@@ -65,10 +65,10 @@ while cap.isOpened():
 
     try:
         # calc box position
-        new_x1, new_x2, new_y2, box, sx, sy, ex, ey = utils.box_pos(boxes)
+        box, sx, sy, ex, ey = utils.box_poses(boxes)
 
         # draw gesture region
-        cv2.rectangle(image, (new_x1, box[1]), (new_x2, new_y2), (0, 0, 255), 1, cv2.LINE_AA)
+        cv2.rectangle(image, (sx, box[1]), (ex, ey), (0, 0, 255), 1, cv2.LINE_AA)
         image = cv2.flip(image, 1)
         img_roi = image[sy:ey, sx:ex].copy()
         frame_h, frame_w, _ = img_roi.shape
