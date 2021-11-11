@@ -23,14 +23,14 @@ pip install -r requirements.txt
 
    연속 동영상 촬영해서 손가락 포인트 좌표 뽑기 / swipe 동작은 알고리즘으로 
  
-   총 201,926개 data - './dataset/raw_data.npy'  
+   총 201,926개 데이터 - './dataset/raw_data.npy'  
 
    `actions = ['palm', 'quiet', 'grab', 'pinch']`
 
     
 ### 2. train
    
-   [train.py](https://github.com/mjw2705/Anyractive/blob/main/train.ipynb)
+   [train.ipynb](https://github.com/mjw2705/Anyractive/blob/main/train.ipynb)
 
    모델 : sequential
 
@@ -39,7 +39,7 @@ pip install -r requirements.txt
   
 ### 3. test & demo
    
-   [test](https://github.com/mjw2705/Anyractive/blob/main/test.py)
+   [test.py](https://github.com/mjw2705/Anyractive/blob/main/test.py)
 
    얼굴 detect하고, 제스쳐 영역 만들기
    - 얼굴 detect 방법
