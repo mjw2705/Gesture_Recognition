@@ -9,26 +9,38 @@ BlazePalm에서 추론된 포인트나 손 이미지로 제스처 인식하기
 거리는 1~2미터도 가능하게
 
 
+## Requirements
+```
+pip install -r requirements.txt
+```
+
+
 ## 모델 구축
 
-1. 데이터셋 수집
-    
-    연속 동영상 촬영해서 손가락 포인트 좌표 뽑기 / swipe 동작은 알고리즘으로 
-    
-    총 201,926개 data - './dataset/raw_data.npy'  
+### 1. collect dataset
 
-    `actions = ['palm', 'quiet', 'grab', 'pinch']`
+   [create_dataset.py](https://github.com/mjw2705/Anyractive/blob/main/create_dataset.py)
+
+   연속 동영상 촬영해서 손가락 포인트 좌표 뽑기 / swipe 동작은 알고리즘으로 
+ 
+   총 201,926개 data - './dataset/raw_data.npy'  
+
+   `actions = ['palm', 'quiet', 'grab', 'pinch']`
 
     
-2. 모델 생성 & 학습
-    
-    모델 : sequential 모델
-    
-    학습 모델 - gesture_model.h5 → onnx모델로 변경
-    
+### 2. train
+   
+   [train.py](https://github.com/mjw2705/Anyractive/blob/main/train.ipynb)
+
+   모델 : sequential
+
+   학습 모델 - gesture_model.h5 → onnx모델로 변경해서 사용
+
   
-3. 테스트
-    
+### 3. test & demo
+   
+   [test](https://github.com/mjw2705/Anyractive/blob/main/test.py)
+
    얼굴 detect하고, 제스쳐 영역 만들기
    - 얼굴 detect 방법
        1. mediapipe pose 사용 → 결정
