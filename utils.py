@@ -3,6 +3,8 @@ import os
 import csv
 import cv2
 import numpy as np
+import mediapipe as mp
+
 
 def calc_predict(d, gesture_session):
     input_data = np.expand_dims(np.array(d, dtype=np.float32), axis=0)
@@ -70,7 +72,83 @@ def face_detect(image, face_session, input_name):
 
     return boxes,labels, probs
 
-def box_pos(boxes):
+def box_pos(box, frame_w, frame_h):
+    box_margin = int((box[2] - box[0]) / 2)
+    box = [box[0] - box_margin, box[1] - box_margin, box[2] + box_margin, box[3] + box_margin]
+    width = box[2] - box[0]
+    height = box[3] - box[1]
+
+    sx = max(box[0] - int(1.5 * width), 0)
+    sy = max(box[1] - height // 2, 0)
+    ex = min(box[2] + int(1.5 * width), frame_w)
+    ey = min(box[3] + height, frame_h)
+
+    return sx, sy, ex, ey
+
+def pose_face(pose_lms, img_width, img_height):
+    cx, cy = pose_lms[0][0], pose_lms[0][1]
+    br = pose_lms[7][0]
+    bl = pose_lms[8][0]
+    bu = pose_lms[1][1]
+    bb = pose_lms[10][1]
+
+    w = max(br, bl) - min(br, bl)
+    h = (max(bu, bb) - min(bu, bb)) * 2
+
+    sx = int((cx - w / 2) * img_width)
+    sy = int((cy - h / 2) * img_height)
+    ex = sx + int(w * img_width)
+    ey = sy + int(h * img_height)
+
+    return (max(sx, 0), max(sy, 0)), (min(ex, img_width), min(ey, img_height))
+
+
+def hand(image, offset):
+    hand =  mp.solutions.hands.Hands(static_image_mode=False,
+                                     max_num_hands=1,
+                                     min_detection_confidence=0.5,
+                                     min_tracking_confidence=0.5)
+
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    h, w, _ = image.shape
+    results = hand.process(image)
+
+    if results.multi_hand_landmarks:
+        res = results.multi_hand_landmarks[0]
+        label = results.multi_handedness[0].classification[0].label
+        joint = np.zeros((21, 4))
+        abs_joint = np.zeros((21, 2))
+
+        for j, lm in enumerate(res.landmark):
+            joint[j] = [lm.x, lm.y, lm.z, lm.visibility]
+            abs_joint[j] = [int(lm.x * w + offset[0]), int(lm.y * h + offset[1])]
+        return joint, abs_joint, label
+    return None, None, None
+
+
+def swipe(swipe_val):
+    if swipe_val == 'right':
+        swipe_q = ['right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right',
+                   'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right',
+                   'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right']
+    elif swipe_val == 'left':
+        swipe_q = ['left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left',
+                   'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left',
+                   'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left']
+    elif swipe_val == 'up':
+        swipe_q = ['up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up',
+                   'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up',
+                   'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up']
+    elif swipe_val == 'down':
+        swipe_q = ['down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down',
+                   'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down',
+                   'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down']
+
+    return swipe_q
+
+
+# -------------------------------not use---------------------------------- #
+def box_poses(boxes):
     boxe_width = [int(w[2] - w[0]) for w in boxes]
     box_idx = np.argmax(boxe_width)
     box = boxes[box_idx, :]
@@ -85,14 +163,8 @@ def box_pos(boxes):
     ex = box[2] + width
     ey = box[3] + height
 
-    new_x1 = box[0] - width
-    new_x2 = box[2] + width
-    new_y2 = box[3] + height
+    return box, sx, sy, ex, ey
 
-    return new_x1, new_x2, new_y2, box, sx, sy, ex, ey
-
-
-# -------------------------------not use---------------------------------- #
 def mkdir(d):
     os.makedirs(d, exist_ok=True)
 
