@@ -39,19 +39,14 @@ pip install -r requirements.txt
   
 ### 3. test & demo
    
-   [test.py](https://github.com/mjw2705/Anyractive/blob/main/test.py)
+   [gesture_test.py](https://github.com/mjw2705/Anyractive/blob/main/gesture_test.py)
 
    얼굴 detect하고, 제스쳐 영역 만들기
-   - 얼굴 detect 방법
-       1. mediapipe pose 사용 → 결정
-       2. facedetector.onnx 모델 사용
     
-   제스쳐 영역 내에서만 제스쳐 인식 할 수 있게, quiet 제스쳐는 입 주변에서만 가능하도록 
-   
-   grab 제스쳐는 회전 각도 계산
-   
+   제스쳐 영역 내에서만 제스쳐 인식 할 수 있게, quiet 제스쳐는 입 주변에서만 가능하도록  
+   grab 제스쳐는 회전 각도 계산  
    swipe은 palm 제스쳐 상태에서 상.하.좌.우 이동 알고리즘 → 손바닥 이동 좌표 비율로 계산
-   
-    
+
+   [gesture_holi.py](https://github.com/mjw2705/Anyractive/blob/main/gesture_holi.py) mediapipe hand -> holistic 으로 변경
    
     
