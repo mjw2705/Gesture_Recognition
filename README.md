@@ -29,10 +29,13 @@ pip install -r requirements.txt
    - 학습된 모델 : gesture_model.h5 → onnx모델로 변경해서 사용
 
    - 학습 정확도 - 99%
-  
-### 3. test & demo
+
+
+## Demo
 
    - 얼굴 detect하고, 제스쳐 영역 만들어 영역 내에서만 제스처인식이 가능하게
    - quiet 제스처는 입 주변 roi에서만 가능하게
    - grab 제스처는 회전 각도 계산
    - swipe 제스처는 palm 제스처가 인식 되면 이동 알고리즘을 사용해서 상.하.좌.우 판단 → 손바닥 이동 좌표 비율로 계산
+
+   ![demo](gesture.gif)
