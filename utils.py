@@ -57,20 +57,9 @@ def draw_timeline(img, rel_x, joint):
 
     cv2.rectangle(img, pt1=(int(img_w/2), img_h - 50), pt2=(int(img_w/2)+timeline_w, img_h - 48), color=(0, 0, 255), thickness=-1)
     cv2.line(img, (int(joint[3][0]), int(joint[3][1])), (int(joint[17][0]), int(joint[17][1])), (0, 0, 0), 4)
-    cv2.putText(img, text='Angle %d' % (angle2,), org=(50, 100), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                fontScale=1, color=(200, 10, 10), thickness=2)
+    cv2.putText(img, text='Angle %d' % (angle2,), org=(30, 50), fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+                fontScale=0.9, color=(200, 10, 10), thickness=2)
 
-def face_detect(image, face_session, input_name):
-    face_img = cv2.resize(image, (320, 240))
-    image_mean = np.array([127, 127, 127])
-    face_img = (face_img - image_mean) / 128
-    face_img = np.transpose(face_img, [2, 0, 1])
-    face_img = np.expand_dims(face_img, axis=0)
-    face_img = face_img.astype(np.float32)
-    confidences, boxes = face_session.run(None, {input_name: face_img})
-    boxes, labels, probs = predict(image.shape[1], image.shape[0], confidences, boxes, 0.9)
-
-    return boxes,labels, probs
 
 def box_pos(box, frame_w, frame_h):
     box_margin = int((box[2] - box[0]) / 2)
@@ -105,9 +94,9 @@ def pose_face(pose_lms, img_width, img_height):
 
 def hand(image, offset):
     hand =  mp.solutions.hands.Hands(static_image_mode=False,
-                                     max_num_hands=1,
-                                     min_detection_confidence=0.5,
-                                     min_tracking_confidence=0.5)
+                                    max_num_hands=1,
+                                    min_detection_confidence=0.5,
+                                    min_tracking_confidence=0.5)
 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     h, w, _ = image.shape
@@ -129,20 +118,20 @@ def hand(image, offset):
 def swipe(swipe_val):
     if swipe_val == 'right':
         swipe_q = ['right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right',
-                   'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right',
-                   'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right']
+                    'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right',
+                    'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right']
     elif swipe_val == 'left':
         swipe_q = ['left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left',
-                   'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left',
-                   'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left']
+                    'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left',
+                    'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left', 'left']
     elif swipe_val == 'up':
         swipe_q = ['up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up',
-                   'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up',
-                   'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up']
+                    'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up',
+                    'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up', 'up']
     elif swipe_val == 'down':
         swipe_q = ['down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down',
-                   'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down',
-                   'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down']
+                    'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down',
+                    'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down', 'down']
 
     return swipe_q
 
@@ -167,98 +156,3 @@ def box_poses(boxes):
 
 def mkdir(d):
     os.makedirs(d, exist_ok=True)
-
-
-def area_of(left_top, right_bottom):
-    """Compute the areas of rectangles given two corners.
-    Args:
-        left_top (N, 2): left top corner.
-        right_bottom (N, 2): right bottom corner.
-    Returns:
-        area (N): return the area.
-    """
-    hw = np.clip(right_bottom - left_top, 0.0, None)
-    return hw[..., 0] * hw[..., 1]
-
-
-def iou_of(boxes0, boxes1, eps=1e-5):
-    """Return intersection-over-union (Jaccard index) of boxes.
-    Args:
-        boxes0 (N, 4): ground truth boxes.
-        boxes1 (N or 1, 4): predicted boxes.
-        eps: a small number to avoid 0 as denominator.
-    Returns:
-        iou (N): IoU values.
-    """
-    overlap_left_top = np.maximum(boxes0[..., :2], boxes1[..., :2])
-    overlap_right_bottom = np.minimum(boxes0[..., 2:], boxes1[..., 2:])
-
-    overlap_area = area_of(overlap_left_top, overlap_right_bottom)
-    area0 = area_of(boxes0[..., :2], boxes0[..., 2:])
-    area1 = area_of(boxes1[..., :2], boxes1[..., 2:])
-    return overlap_area / (area0 + area1 - overlap_area + eps)
-
-
-def hard_nms(box_scores, iou_threshold, top_k=-1, candidate_size=200):
-    """
-    Args:
-        box_scores (N, 5): boxes in corner-form and probabilities.
-        iou_threshold: intersection over union threshold.
-        top_k: keep top_k results. If k <= 0, keep all the results.
-        candidate_size: only consider the candidates with the highest scores.
-    Returns:
-         picked: a list of indexes of the kept boxes
-    """
-    scores = box_scores[:, -1]
-    boxes = box_scores[:, :-1]
-    picked = []
-    # _, indexes = scores.sort(descending=True)
-    indexes = np.argsort(scores)
-    # indexes = indexes[:candidate_size]
-    indexes = indexes[-candidate_size:]
-    while len(indexes) > 0:
-        # current = indexes[0]
-        current = indexes[-1]
-        picked.append(current)
-        if 0 < top_k == len(picked) or len(indexes) == 1:
-            break
-        current_box = boxes[current, :]
-        # indexes = indexes[1:]
-        indexes = indexes[:-1]
-        rest_boxes = boxes[indexes, :]
-        iou = iou_of(
-            rest_boxes,
-            np.expand_dims(current_box, axis=0),
-        )
-        indexes = indexes[iou <= iou_threshold]
-
-    return box_scores[picked, :]
-
-
-def predict(width, height, confidences, boxes, prob_threshold, iou_threshold=0.3, top_k=-1):
-    boxes = boxes[0]
-    confidences = confidences[0]
-    picked_box_probs = []
-    picked_labels = []
-    for class_index in range(1, confidences.shape[1]):
-        probs = confidences[:, class_index]
-        mask = probs > prob_threshold
-        probs = probs[mask]
-        if probs.shape[0] == 0:
-            continue
-        subset_boxes = boxes[mask, :]
-        box_probs = np.concatenate([subset_boxes, probs.reshape(-1, 1)], axis=1)
-        box_probs = hard_nms(box_probs,
-                             iou_threshold=iou_threshold,
-                             top_k=top_k,
-                             )
-        picked_box_probs.append(box_probs)
-        picked_labels.extend([class_index] * box_probs.shape[0])
-    if not picked_box_probs:
-        return np.array([]), np.array([]), np.array([])
-    picked_box_probs = np.concatenate(picked_box_probs)
-    picked_box_probs[:, 0] *= width
-    picked_box_probs[:, 1] *= height
-    picked_box_probs[:, 2] *= width
-    picked_box_probs[:, 3] *= height
-    return picked_box_probs[:, :4].astype(np.int32), np.array(picked_labels), picked_box_probs[:, 4]
