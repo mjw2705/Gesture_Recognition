@@ -6,6 +6,18 @@ import numpy as np
 import mediapipe as mp
 
 
+def get_landmark(landmarks, image):
+    frame_h, frame_w = image.shape[:2]
+
+    joint = np.zeros((21, 4))
+    abs_joint = np.zeros((21, 2))
+
+    for j, lm in enumerate(landmarks.landmark):
+        joint[j] = [lm.x, lm.y, lm.z, lm.visibility]
+        abs_joint[j] = [int(lm.x * frame_w), int(lm.y * frame_h)]
+
+    return joint, abs_joint
+
 def calc_predict(d, gesture_session):
     input_data = np.expand_dims(np.array(d, dtype=np.float32), axis=0)
 
@@ -91,30 +103,6 @@ def pose_face(pose_lms, img_width, img_height):
 
     return (max(sx, 0), max(sy, 0)), (min(ex, img_width), min(ey, img_height))
 
-
-def hand(image, offset):
-    hand =  mp.solutions.hands.Hands(static_image_mode=False,
-                                    max_num_hands=1,
-                                    min_detection_confidence=0.5,
-                                    min_tracking_confidence=0.5)
-
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    h, w, _ = image.shape
-    results = hand.process(image)
-
-    if results.multi_hand_landmarks:
-        res = results.multi_hand_landmarks[0]
-        label = results.multi_handedness[0].classification[0].label
-        joint = np.zeros((21, 4))
-        abs_joint = np.zeros((21, 2))
-
-        for j, lm in enumerate(res.landmark):
-            joint[j] = [lm.x, lm.y, lm.z, lm.visibility]
-            abs_joint[j] = [int(lm.x * w + offset[0]), int(lm.y * h + offset[1])]
-        return joint, abs_joint, label
-    return None, None, None
-
-
 def swipe(swipe_val):
     if swipe_val == 'right':
         swipe_q = ['right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right', 'right',
@@ -156,3 +144,25 @@ def box_poses(boxes):
 
 def mkdir(d):
     os.makedirs(d, exist_ok=True)
+
+def hand(image, offset):
+    hand =  mp.solutions.hands.Hands(static_image_mode=False,
+                                    max_num_hands=1,
+                                    min_detection_confidence=0.5,
+                                    min_tracking_confidence=0.5)
+
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    h, w, _ = image.shape
+    results = hand.process(image)
+
+    if results.multi_hand_landmarks:
+        res = results.multi_hand_landmarks[0]
+        label = results.multi_handedness[0].classification[0].label
+        joint = np.zeros((21, 4))
+        abs_joint = np.zeros((21, 2))
+
+        for j, lm in enumerate(res.landmark):
+            joint[j] = [lm.x, lm.y, lm.z, lm.visibility]
+            abs_joint[j] = [int(lm.x * w + offset[0]), int(lm.y * h + offset[1])]
+        return joint, abs_joint, label
+    return None, None, None
